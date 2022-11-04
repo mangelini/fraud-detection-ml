@@ -1,0 +1,22 @@
+Training Model LR 
+--------------
+Training Accuracy: 0.9992297742287265
+Testing Accuracy: 0.9992036826186268
+Testing Confusion Matrix: 
+[[857792     37]
+ [   647    478]]
+Recall Score :  0.9992036826186268
+Precision Score :  0.9992036826186268
+Testing F-1: 0.9992036826186268
+------------------------------
+Training Model RF 
+--------------
+Training Accuracy: 0.9993450307391785
+Testing Accuracy: 0.9993247601152099
+Testing Confusion Matrix: 
+[[857829      0]
+ [   580    545]]
+Recall Score :  0.9993247601152099
+Precision Score :  0.9993247601152099
+Testing F-1: 0.9993247601152099
+------------------------------
