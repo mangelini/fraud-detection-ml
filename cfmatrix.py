@@ -33,6 +33,7 @@ def make_confusion_matrix(cf,
                    See http://matplotlib.org/examples/color/colormaps_reference.html
                    
     title:         Title for the heatmap. Default is None.
+    axes:          Used when we want multiple plots in one figure
     '''
 
 
