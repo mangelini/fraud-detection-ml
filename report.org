@@ -11,7 +11,7 @@ We will use traditional performance metrics for classification to measure how we
 
 **  Splitting training/test set
 We need to split our dataset even before doing any other analysis because otherwise there's a high chance of overfitting. Another reason is that there's a high risk of leakage, this means that the training set is not completely new for the model.
-We first split the dataset in two sets called /train_set/ and /test_set/ with a percentage of 90 and 10 respectively because Machine Learning and especially Deep Learning models needs a lot of data to execute the training. We put aside the /test_set/ and we don't touch it anymore until the end.
+We first split the dataset in two sets called /train \under set/ and /test \under set/ with a percentage of 90 and 10 respectively because Machine Learning and especially Deep Learning models needs a lot of data to execute the training. We put aside the /test \under set/ and we don't touch it anymore until the end.
 
 **  Data exploration
 In this section we will explore the dataset analyzing each feature and their relationships. We can start by plotting the first rows and describing each column.
@@ -34,15 +34,15 @@ In this section we will plot and explore the most interesting features.
 It represents a unit of time where 1 step equals 1 hour, in the following graph we can see the time distribution.
 ****  Type
 It represents a type of online transaction, there are 5 classes:
-- CASH_OUT
+- CASH \under OUT
 - PAYMENT
-- CASH_IN
+- CASH \under IN
 - TRANSFER
 - DEBIT
 
 We can plot its distribution and check which one is the most frequent in our dataset.
 
-It looks like most of the transactions are either CASH_OUT or PAYMENT, so the majority of frauds will be of one of this two categories.
+It looks like most of the transactions are either CASH \under OUT or PAYMENT, so the majority of frauds will be of one of this two categories.
 ****  isFraud
 This is our target feature, or label, and we can notice from the graph below that it is imbalanced, which is not ideal for a classification task. We will discuss about the consequences and how to improve it in the next chapters.
 ****  Amount
