@@ -11,14 +11,13 @@ from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
-from cfmatrix import make_confusion_matrix
 from sklearn.decomposition import PCA
 import tensorflow as tf
 tf.get_logger().setLevel(tf._logging.ERROR)
 from scikeras.wrappers import KerasClassifier
 import keras_tuner
 
-# Functions and classes declarations
+# 1. FUNCTIONS AND CLASSES DECLARATIONS
 # this function plots a dataframe as a table
 def plot_table(df, n=4):
     fig, ax = plt.subplots()
@@ -32,6 +31,7 @@ def plot_table(df, n=4):
     table.scale(10.0, 10.0)
 
     plt.show()
+    plt.close()
 
 
 # this class is used in the Pipeline to delete columns from dataframe
@@ -77,6 +77,85 @@ def create_baseline(hp=None):
 	model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 	return model
 
+# Confusion Matrix for models performance evaluation
+def make_confusion_matrix(cf,
+                          group_names=None,
+                          categories='auto',
+                          count=True,
+                          percent=True,
+                          cbar=True,
+                          xyticks=True,
+                          xyplotlabels=True,
+                          sum_stats=True,
+                          figsize=None,
+                          cmap='Blues',
+                          title=None):
+
+    # CODE TO GENERATE TEXT INSIDE EACH SQUARE
+    blanks = ['' for i in range(cf.size)]
+
+    if group_names and len(group_names)==cf.size:
+        group_labels = ["{}\n".format(value) for value in group_names]
+    else:
+        group_labels = blanks
+
+    if count:
+        group_counts = ["{0:0.0f}\n".format(value) for value in cf.flatten()]
+    else:
+        group_counts = blanks
+
+    if percent:
+        group_percentages = ["{0:.2%}".format(value) for value in cf.flatten()/np.sum(cf)]
+    else:
+        group_percentages = blanks
+
+    box_labels = [f"{v1}{v2}{v3}".strip() for v1, v2, v3 in zip(group_labels,group_counts,group_percentages)]
+    box_labels = np.asarray(box_labels).reshape(cf.shape[0],cf.shape[1])
+
+
+    # CODE TO GENERATE SUMMARY STATISTICS & TEXT FOR SUMMARY STATS
+    if sum_stats:
+        #Accuracy is sum of diagonal divided by total observations
+        accuracy  = np.trace(cf) / float(np.sum(cf))
+
+        #if it is a binary confusion matrix, show some more stats
+        if len(cf)==2:
+            #Metrics for Binary Confusion Matrices
+            precision = cf[1,1] / sum(cf[:,1])
+            recall    = cf[1,1] / sum(cf[1,:])
+            f1_score  = 2*precision*recall / (precision + recall)
+            stats_text = "\n\nAccuracy={:0.3f}\nPrecision={:0.3f}\nRecall={:0.3f}\nF1 Score={:0.3f}".format(
+                accuracy,precision,recall,f1_score)
+        else:
+            stats_text = "\n\nAccuracy={:0.3f}".format(accuracy)
+    else:
+        stats_text = ""
+
+
+    # SET FIGURE PARAMETERS ACCORDING TO OTHER ARGUMENTS
+    if figsize==None:
+        #Get default figure size if not set
+        figsize = plt.rcParams.get('figure.figsize')
+
+    if xyticks==False:
+        #Do not show categories if xyticks is False
+        categories=False
+
+
+    # MAKE THE HEATMAP VISUALIZATION
+    plt.figure(figsize=figsize)
+    sb.heatmap(cf,annot=box_labels,fmt="",cmap=cmap,cbar=cbar,xticklabels=categories,yticklabels=categories)
+
+    if xyplotlabels:
+        plt.ylabel('True label')
+        plt.xlabel('Predicted label' + stats_text)
+    else:
+        plt.xlabel(stats_text)
+    
+    if title:
+        plt.title(title)
+    plt.show()
+
 
 # 2. PREP DATA
 # dataset available at https://www.kaggle.com/datasets/jainilcoder/online-payment-fraud-detection
@@ -98,6 +177,7 @@ max_hours = step.max()
 plt.title('Step')
 plt.hist(step, max_hours, density=True)
 plt.show()
+plt.close()
 
 # 3.1.2 Type
 type = train_set["type"].value_counts()
@@ -106,6 +186,7 @@ quantity = type.values
 expl = np.array([0.1, 0.1, 0.1, 0.1, 0.1])
 figure = plt.pie(quantity, labels=transaction_names, explode=expl, autopct='%1.1f%%')
 plt.show()
+plt.close()
 
 # 3.1.3 isFraud
 train_set["isFraud"].value_counts().plot(kind='bar')
@@ -129,6 +210,7 @@ plt.title('the largest 10 balances before transaction')
 plt.xlabel('Client Id')
 plt.ylabel('The Balance')
 plt.show()
+plt.close()
 
 # After Transaction
 plt.figure(figsize = [10,7])
@@ -138,6 +220,7 @@ plt.title('the largest 10 balances after transaction')
 plt.xlabel('Client Id')
 plt.ylabel('The Balance')
 plt.show()
+plt.close()
 
 # 3.2 Finding correlations
 
@@ -186,7 +269,7 @@ X = train_set.loc[:, train_set.columns != "isFraud"]
 labels = ["True Neg","False Pos","False Neg","True Pos"]
 categories = ["notFraud", "isFraud"]
 
-X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.15)
+X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.15, random_state=42)
 
 model = LogisticRegression(max_iter=300)
 model.fit(X_train, y_train)
@@ -198,7 +281,7 @@ make_confusion_matrix(cf_matrix, group_names=labels, categories=categories)
 y = train_set.loc[:, "isFraud"]
 X_reduced = train_set.loc[:, ["amount"]]
 
-X_train, X_val, y_train, y_val = train_test_split(X_reduced, y, test_size=0.15)
+X_train, X_val, y_train, y_val = train_test_split(X_reduced, y, test_size=0.15, random_state=42)
 
 model = LogisticRegression(max_iter=300)
 model.fit(X_train, y_train)
@@ -223,6 +306,7 @@ class_1 = train_set[train_set['isFraud'] == 1]
 
 class_0_under = class_0.sample(class_count_1)
 train_set = pd.concat([class_0_under, class_1], axis=0)
+y = train_set.loc[:, "isFraud"]
 X = train_set.loc[:, train_set.columns != "isFraud"]
 
 # plot balanced dataset
